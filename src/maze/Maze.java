@@ -1,8 +1,11 @@
 package maze;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Maze implements Serializable{
@@ -20,11 +23,11 @@ public class Maze implements Serializable{
         }
 
         public int getX() {
-            return x;
+            return this.x;
         }
 
         public int getY() {
-            return y;
+            return this.y;
         }
 
         public String toString(){
@@ -38,11 +41,45 @@ public class Maze implements Serializable{
 
     private Maze(){}
 
-    public static Maze fromTxt(String sIn){
+    public static Maze fromTxt(String path) throws InvalidMazeException {
+        Maze maze = new Maze();
+
+        try(BufferedReader bufferedReader = new BufferedReader(new FileReader(path))) {
+            String line = bufferedReader.readLine();
+            int len = line.length();
+
+            while (line != null) {
+                ArrayList<Tile> row = new ArrayList<>();
+                maze.tiles.add(0, row);
+
+                int line_len = line.length();
+                if (line_len != len) {
+                    throw new RaggedMazeException();
+                }
+
+                for (int i = 0; i < line_len; i++) {
+                    Tile tile = Tile.fromChar(line.charAt(i));
+                    row.add(tile);
+
+                    if (tile.getType() == Tile.Type.ENTRANCE) {
+                        maze.setEntrance(tile);
+                    } else if (tile.getType() == Tile.Type.EXIT) {
+                        maze.setExit(tile);
+                    }
+                }
+
+                line = bufferedReader.readLine();
+            }
+        } catch (FileNotFoundException exception) {
+            throw new InvalidMazeException();
+        } catch (IOException exception) {
+            throw new InvalidMazeException();
+        }
+
         return null;
     }
 
-    private void setEntrance(Tile tile){
+    private void setEntrance(Tile tile) throws IllegalArgumentException, MultipleEntranceException {
         if (this.entrance == null){
             if (this.getTileLocation(tile).getX() != -1){
                 this.entrance = tile;
@@ -53,7 +90,7 @@ public class Maze implements Serializable{
         }
     }
 
-    private void setExit(Tile tile){
+    private void setExit(Tile tile) throws IllegalArgumentException, MultipleExitException {
         if (this.exit == null){
             if (this.getTileLocation(tile).getX() != -1){
                 this.exit = tile;
@@ -64,7 +101,7 @@ public class Maze implements Serializable{
         }
     }
 
-    public Coordinate getTileLocation(Tile tile){
+    public Coordinate getTileLocation(Tile tile) {
         for (int i=0; i < this.tiles.size(); i++){
             int index = this.tiles.get(i).indexOf(tile);
 
@@ -75,11 +112,11 @@ public class Maze implements Serializable{
         return new Coordinate(-1, -1);
     }
 
-    public Tile getEntrance(){
+    public Tile getEntrance() {
         return this.entrance;
     }
 
-    public Tile getExit(){
+    public Tile getExit() {
         return this.exit;
     }
 
