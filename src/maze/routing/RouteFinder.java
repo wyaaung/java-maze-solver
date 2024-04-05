@@ -3,6 +3,7 @@ package maze.routing;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -29,7 +30,7 @@ public class RouteFinder implements Serializable {
     }
 
     public List<Tile> getRoute() {
-      return null;
+      return new ArrayList<>(route);
     }
     public boolean isFinished() {
       return this.finished;
